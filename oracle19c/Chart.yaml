@@ -1,0 +1,6 @@
+apiVersion: v2
+name: oracle19c
+description: Helm chart for Oracle 19c Enterprise Database
+type: application
+version: 0.1.0
+appVersion: "19.3.0.0"
