@@ -29,7 +29,7 @@ oracle19c:
       create: false
       name: "oracle-registry-secret"
       server: "container-registry.oracle.com"
-      username: "pengseangsim210@gmail.com"
+      username: ""
       password: ""
       email: "pengseangsim210@gmail.com"
   fullnameOverride: "oracle-itp"
