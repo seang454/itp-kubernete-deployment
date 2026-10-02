@@ -22,6 +22,7 @@ spec:
         {{- include "event-driven-infra.labels" $ | nindent 8 }}
         app.kubernetes.io/name: {{ .name }}
     spec:
+      enableServiceLinks: false
       securityContext:
         {{- toYaml $.Values.kafka.securityContext | nindent 8 }}
       containers:
@@ -57,6 +58,8 @@ spec:
               value: "CONTROLLER"
             - name: CLUSTER_ID
               value: {{ $.Values.clusterId | quote }}
+            - name: KAFKA_INITIAL_BROKER_REGISTRATION_TIMEOUT_MS
+              value: "240000"
             - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
               value: {{ .offsetsTopicReplicationFactor | quote }}
             - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
@@ -80,6 +83,18 @@ spec:
       volumes:
         - name: kafka-data
           emptyDir: {}
+      {{- end }}
+      {{- with $.Values.kafka.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.kafka.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.kafka.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
       {{- end }}
   {{- if $.Values.kafka.persistence.enabled }}
   volumeClaimTemplates:

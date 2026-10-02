@@ -48,8 +48,26 @@ oracle19c:
       cpu: 1000m
       memory: 2560Mi
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 1536Mi
+  nodeSelector:
+    kubernetes.io/arch: amd64
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+        - weight: 80
+          preference:
+            matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+  tolerations: []
 
 # ------------------------------------------------------------------------------
 # 2. PostgreSQL Databases (Microservices & IAM)
@@ -79,7 +97,7 @@ itp-postgres:
         cpu: 250m
         memory: 512Mi
       requests:
-        cpu: 25m
+        cpu: 10m
         memory: 128Mi
   iamDb:
     enabled: true
@@ -100,8 +118,26 @@ itp-postgres:
         cpu: 250m
         memory: 512Mi
       requests:
-        cpu: 25m
+        cpu: 10m
         memory: 128Mi
+  nodeSelector:
+    kubernetes.io/arch: amd64
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+        - weight: 80
+          preference:
+            matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+  tolerations: []
 
 # ------------------------------------------------------------------------------
 # 3. Event-Driven Infrastructure (Kafka KRaft, Schema Registry, Debezium, Kafka UI)
@@ -125,8 +161,26 @@ event-driven-infra:
         cpu: 500m
         memory: 512Mi
       requests:
-        cpu: 50m
+        cpu: 25m
         memory: 256Mi
+    nodeSelector:
+      kubernetes.io/arch: amd64
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: node-role.kubernetes.io/control-plane
+                  operator: Exists
+          - weight: 80
+            preference:
+              matchExpressions:
+                - key: kubernetes.io/arch
+                  operator: In
+                  values:
+                    - amd64
+    tolerations: []
   schemaRegistry:
     enabled: true
     name: schema-registry-itp
@@ -147,8 +201,26 @@ event-driven-infra:
         cpu: 250m
         memory: 384Mi
       requests:
-        cpu: 25m
+        cpu: 10m
         memory: 192Mi
+    nodeSelector:
+      kubernetes.io/arch: amd64
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: node-role.kubernetes.io/control-plane
+                  operator: Exists
+          - weight: 80
+            preference:
+              matchExpressions:
+                - key: kubernetes.io/arch
+                  operator: In
+                  values:
+                    - amd64
+    tolerations: []
   debezium:
     enabled: true
     name: debezium-kafka-connect-itp
@@ -159,7 +231,7 @@ event-driven-infra:
     service:
       type: ClusterIP
       port: 8083
-    jvmOpts: "-Xms128m -Xmx384m"
+    jvmOpts: "-Xms256m -Xmx1024m"
     persistence:
       enabled: true
       storageClassName: "longhorn"
@@ -168,10 +240,28 @@ event-driven-infra:
     resources:
       limits:
         cpu: 500m
-        memory: 768Mi
+        memory: 2048Mi
       requests:
-        cpu: 50m
-        memory: 384Mi
+        cpu: 10m
+        memory: 512Mi
+    nodeSelector:
+      kubernetes.io/arch: amd64
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: node-role.kubernetes.io/control-plane
+                  operator: Exists
+          - weight: 80
+            preference:
+              matchExpressions:
+                - key: kubernetes.io/arch
+                  operator: In
+                  values:
+                    - amd64
+    tolerations: []
   kafkaUi:
     enabled: true
     name: kafka-ui-itp
@@ -196,8 +286,26 @@ event-driven-infra:
         cpu: 250m
         memory: 384Mi
       requests:
-        cpu: 25m
+        cpu: 10m
         memory: 128Mi
+    nodeSelector:
+      kubernetes.io/arch: amd64
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: node-role.kubernetes.io/control-plane
+                  operator: Exists
+          - weight: 80
+            preference:
+              matchExpressions:
+                - key: kubernetes.io/arch
+                  operator: In
+                  values:
+                    - amd64
+    tolerations: []
 
 # ------------------------------------------------------------------------------
 # 4. HashiCorp Vault Server
@@ -226,6 +334,24 @@ vault-server:
     requests:
       cpu: 10m
       memory: 64Mi
+  nodeSelector:
+    kubernetes.io/arch: amd64
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+        - weight: 80
+          preference:
+            matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+  tolerations: []
 
 # ------------------------------------------------------------------------------
 # 5. Redis Cache
@@ -255,3 +381,21 @@ redis:
     requests:
       cpu: 10m
       memory: 64Mi
+  nodeSelector:
+    kubernetes.io/arch: amd64
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+        - weight: 80
+          preference:
+            matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+  tolerations: []

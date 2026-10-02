@@ -83,7 +83,7 @@ debezium:
   statusStorageTopic: "cdc_connect_status"
   keyConverter: "io.confluent.connect.avro.AvroConverter"
   valueConverter: "io.confluent.connect.avro.AvroConverter"
-  jvmOpts: "-Xms128m -Xmx384m"
+  jvmOpts: "-Xms256m -Xmx1024m"
   persistence:
     enabled: true
     storageClassName: "longhorn"
@@ -93,10 +93,10 @@ debezium:
   resources:
     limits:
       cpu: 500m
-      memory: 768Mi
+      memory: 2048Mi
     requests:
-      cpu: 50m
-      memory: 384Mi
+      cpu: 10m
+      memory: 512Mi
 
 # Kafka UI
 kafkaUi:
