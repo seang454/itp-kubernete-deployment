@@ -1,0 +1,98 @@
+{{- range .Values.kafka.nodes }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .name }}
+  labels:
+    {{- include "event-driven-infra.labels" $ | nindent 4 }}
+    app.kubernetes.io/name: {{ .name }}
+spec:
+  serviceName: {{ .name }}
+  replicas: 1
+  podManagementPolicy: OrderedReady
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .name }}
+  template:
+    metadata:
+      labels:
+        {{- include "event-driven-infra.labels" $ | nindent 8 }}
+        app.kubernetes.io/name: {{ .name }}
+    spec:
+      securityContext:
+        {{- toYaml $.Values.kafka.securityContext | nindent 8 }}
+      containers:
+        - name: kafka
+          image: "{{ $.Values.kafka.image.repository }}:{{ $.Values.kafka.image.tag }}"
+          imagePullPolicy: {{ $.Values.kafka.image.pullPolicy }}
+          ports:
+            - name: plaintext
+              containerPort: 9090
+              protocol: TCP
+            - name: controller
+              containerPort: 9091
+              protocol: TCP
+            - name: external
+              containerPort: {{ .externalPort }}
+              protocol: TCP
+          env:
+            - name: KAFKA_NODE_ID
+              value: {{ .id | quote }}
+            - name: KAFKA_PROCESS_ROLES
+              value: "broker,controller"
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT"
+            - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+              value: "1@kafka-1-itp:9091,2@kafka-2-itp:9091,3@kafka-3-itp:9091"
+            - name: KAFKA_LISTENERS
+              value: "PLAINTEXT://:9090,CONTROLLER://:9091,EXTERNAL://:{{ .externalPort }}"
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://{{ .name }}:9090,EXTERNAL://localhost:{{ .externalPort }}"
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: "PLAINTEXT"
+            - name: KAFKA_CONTROLLER_LISTENER_NAMES
+              value: "CONTROLLER"
+            - name: CLUSTER_ID
+              value: {{ $.Values.clusterId | quote }}
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: {{ .offsetsTopicReplicationFactor | quote }}
+            - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+              value: "1"
+            - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+              value: "1"
+            - name: KAFKA_LOG_DIRS
+              value: {{ $.Values.kafka.logDirs | quote }}
+            - name: KAFKA_HEAP_OPTS
+              value: {{ $.Values.kafka.jvmOpts | quote }}
+            {{- if or (eq (int .id) 2) (eq (int .id) 3) }}
+            - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
+              value: "0"
+            {{- end }}
+          volumeMounts:
+            - name: kafka-data
+              mountPath: {{ $.Values.kafka.logDirs }}
+          resources:
+            {{- toYaml $.Values.kafka.resources | nindent 12 }}
+      {{- if not $.Values.kafka.persistence.enabled }}
+      volumes:
+        - name: kafka-data
+          emptyDir: {}
+      {{- end }}
+  {{- if $.Values.kafka.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-data
+      spec:
+        accessModes: [ {{ $.Values.kafka.persistence.accessMode | quote }} ]
+        {{- if $.Values.kafka.persistence.storageClassName }}
+        storageClassName: {{ $.Values.kafka.persistence.storageClassName | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $.Values.kafka.persistence.size }}
+  {{- end }}
+---
+{{- end }}

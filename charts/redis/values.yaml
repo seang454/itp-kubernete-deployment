@@ -1,0 +1,56 @@
+replicaCount: 1
+
+image:
+  repository: redis
+  tag: "8-alpine"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+nameOverride: ""
+fullnameOverride: "itp-redis"
+
+serviceAccount:
+  create: false
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 6379
+  nodePort: null
+
+command:
+  - redis-server
+  - /usr/local/etc/redis/redis.conf
+
+env:
+  REDIS_REPLICATION_MODE: "master"
+
+auth:
+  enabled: true
+  password: "qwer"
+
+persistence:
+  enabled: true
+  storageClassName: ""
+  accessMode: ReadWriteOnce
+  size: 5Gi
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Custom redis.conf content, defaults to file redis.conf if omitted
+redisConfig: ""
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

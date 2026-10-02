@@ -1,0 +1,18 @@
+Event-Driven Infrastructure Chart deployed successfully.
+
+Components deployed:
+1. Kafka Brokers:
+   - kafka-1-itp: kafka-1-itp.{{ .Release.Namespace }}.svc.k8scluster:9090
+   - kafka-2-itp: kafka-2-itp.{{ .Release.Namespace }}.svc.k8scluster:9090
+   - kafka-3-itp: kafka-3-itp.{{ .Release.Namespace }}.svc.k8scluster:9090
+   - Combined Bootstrap: kafka.{{ .Release.Namespace }}.svc.k8scluster:9090
+
+2. Schema Registry:
+   - URL: http://schema-registry-itp.{{ .Release.Namespace }}.svc.k8scluster:8081
+
+3. Debezium Kafka Connect:
+   - URL: http://debezium-kafka-connect-itp.{{ .Release.Namespace }}.svc.k8scluster:8083
+
+4. Kafka UI:
+   - Access URL: http://kafka-ui-itp.{{ .Release.Namespace }}.svc.k8scluster:8080
+   - Login: {{ .Values.kafkaUi.auth.username }} / {{ .Values.kafkaUi.auth.password }}

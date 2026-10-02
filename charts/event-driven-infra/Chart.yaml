@@ -1,0 +1,6 @@
+apiVersion: v2
+name: event-driven-infra
+description: Helm chart for Event-Driven Infrastructure (Kafka KRaft 3-node cluster, Schema Registry, Debezium Kafka Connect, Kafka UI)
+type: application
+version: 0.1.0
+appVersion: "7.8.0"

@@ -1,0 +1,23 @@
+apiVersion: v2
+name: itp-deployment
+description: Main umbrella Helm chart for ITP infrastructure (Oracle 19c, PostgreSQL, Event-Driven Infra/Kafka, Vault, Redis)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+dependencies:
+  - name: oracle19c
+    version: 0.1.0
+    condition: oracle19c.enabled
+  - name: itp-postgres
+    version: 0.1.0
+    condition: itp-postgres.enabled
+  - name: event-driven-infra
+    version: 0.1.0
+    condition: event-driven-infra.enabled
+  - name: vault-server
+    version: 0.1.0
+    condition: vault-server.enabled
+  - name: redis
+    version: 0.1.0
+    condition: redis.enabled

@@ -1,0 +1,13 @@
+{{- if .Values.microDb.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.microDb.name }}-init
+  labels:
+    {{- include "itp-postgres.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.microDb.name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  pg_itp_micro_init.sql: |-
+{{ .Files.Get "init_scripts/pg_itp_micro_init.sql" | indent 4 }}
+{{- end }}

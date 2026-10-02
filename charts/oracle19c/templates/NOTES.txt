@@ -1,0 +1,10 @@
+Oracle 19c Enterprise Database Helm Chart deployed successfully.
+
+1. Get the Oracle service status:
+   kubectl get svc --namespace {{ .Release.Namespace }} {{ include "oracle19c.fullname" . }}
+
+2. Connect to Oracle Database:
+   Host: {{ include "oracle19c.fullname" . }}.{{ .Release.Namespace }}.svc.k8scluster
+   Port: {{ .Values.service.port }}
+   Service Name: ORCLPDB1 (PDB) or ORCLCDB (CDB)
+   Default Password: {{ .Values.oracle.pwd }}

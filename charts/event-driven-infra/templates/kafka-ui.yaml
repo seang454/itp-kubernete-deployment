@@ -1,0 +1,112 @@
+{{- if .Values.kafkaUi.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.kafkaUi.name }}
+  labels:
+    {{- include "event-driven-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.kafkaUi.name }}
+spec:
+  type: {{ .Values.kafkaUi.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.kafkaUi.service.port }}
+      targetPort: 8080
+      protocol: TCP
+      {{- if and (eq .Values.kafkaUi.service.type "NodePort") .Values.kafkaUi.service.nodePort }}
+      nodePort: {{ .Values.kafkaUi.service.nodePort }}
+      {{- end }}
+  selector:
+    app.kubernetes.io/name: {{ .Values.kafkaUi.name }}
+---
+{{- if .Values.kafkaUi.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-ui-itp-data
+  labels:
+    {{- include "event-driven-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.kafkaUi.name }}
+spec:
+  accessModes: [ {{ .Values.kafkaUi.persistence.accessMode | quote }} ]
+  {{- if .Values.kafkaUi.persistence.storageClassName }}
+  storageClassName: {{ .Values.kafkaUi.persistence.storageClassName | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.kafkaUi.persistence.size }}
+---
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.kafkaUi.name }}
+  labels:
+    {{- include "event-driven-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.kafkaUi.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.kafkaUi.name }}
+  template:
+    metadata:
+      labels:
+        {{- include "event-driven-infra.labels" . | nindent 8 }}
+        app.kubernetes.io/name: {{ .Values.kafkaUi.name }}
+    spec:
+      containers:
+        - name: kafka-ui
+          image: "{{ .Values.kafkaUi.image.repository }}:{{ .Values.kafkaUi.image.tag }}"
+          imagePullPolicy: {{ .Values.kafkaUi.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: AUTH_TYPE
+              value: {{ .Values.kafkaUi.auth.type | quote }}
+            - name: SPRING_SECURITY_USER_NAME
+              value: {{ .Values.kafkaUi.auth.username | quote }}
+            - name: SPRING_SECURITY_USER_PASSWORD
+              value: {{ .Values.kafkaUi.auth.password | quote }}
+            - name: KAFKA_CLUSTERS_0_NAME
+              value: {{ .Values.kafkaUi.clusterName | quote }}
+            - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+              value: "kafka-1-itp:9090,kafka-2-itp:9090,kafka-3-itp:9090"
+            - name: KAFKA_CLUSTERS_0_SCHEMAREGISTRY
+              value: "http://schema-registry-itp:8081"
+            - name: KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME
+              value: "debezium-kafka-connect-itp"
+            - name: KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS
+              value: "http://debezium-kafka-connect-itp:8083"
+          volumeMounts:
+            - name: kafka-ui-data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.kafkaUi.resources | nindent 12 }}
+      volumes:
+        - name: kafka-ui-data
+          {{- if .Values.kafkaUi.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: kafka-ui-itp-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}

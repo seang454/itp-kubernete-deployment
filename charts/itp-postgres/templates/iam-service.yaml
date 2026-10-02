@@ -1,0 +1,23 @@
+{{- if .Values.iamDb.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.iamDb.name }}
+  labels:
+    {{- include "itp-postgres.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.iamDb.name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  type: {{ .Values.iamDb.service.type }}
+  ports:
+    - port: {{ .Values.iamDb.service.port }}
+      targetPort: 5432
+      protocol: TCP
+      name: postgres
+      {{- if and (eq .Values.iamDb.service.type "NodePort") .Values.iamDb.service.nodePort }}
+      nodePort: {{ .Values.iamDb.service.nodePort }}
+      {{- end }}
+  selector:
+    app.kubernetes.io/name: {{ .Values.iamDb.name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

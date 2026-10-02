@@ -1,0 +1,43 @@
+================================================================================
+ITP Deployment Infrastructure Suite deployed successfully!
+================================================================================
+
+Subcharts status:
+  - Oracle 19c:           {{ if .Values.oracle19c.enabled }}ENABLED{{ else }}DISABLED{{ end }}
+  - PostgreSQL DBs:       {{ if index .Values "itp-postgres" "enabled" }}ENABLED{{ else }}DISABLED{{ end }}
+  - Event-Driven Infra:   {{ if index .Values "event-driven-infra" "enabled" }}ENABLED{{ else }}DISABLED{{ end }}
+  - Vault Server:         {{ if index .Values "vault-server" "enabled" }}ENABLED{{ else }}DISABLED{{ end }}
+  - Redis:                {{ if .Values.redis.enabled }}ENABLED{{ else }}DISABLED{{ end }}
+
+Service Endpoints (Internal DNS in namespace '{{ .Release.Namespace }}'):
+{{- if .Values.oracle19c.enabled }}
+1. Oracle 19c Database:
+   Host: oracle-itp.{{ .Release.Namespace }}.svc.k8scluster:1521
+   PDB:  ORCLPDB1
+{{- end }}
+
+{{- if index .Values "itp-postgres" "enabled" }}
+2. PostgreSQL Databases:
+   Microservices DB: pg-itp-micro-db.{{ .Release.Namespace }}.svc.k8scluster:5432
+   IAM DB:           pg-itp-iam-db.{{ .Release.Namespace }}.svc.k8scluster:5432
+{{- end }}
+
+{{- if index .Values "event-driven-infra" "enabled" }}
+3. Event-Driven Infrastructure:
+   Kafka Bootstrap:  kafka.{{ .Release.Namespace }}.svc.k8scluster:9090
+   Schema Registry:  http://schema-registry-itp.{{ .Release.Namespace }}.svc.k8scluster:8081
+   Debezium Connect: http://debezium-kafka-connect-itp.{{ .Release.Namespace }}.svc.k8scluster:8083
+   Kafka UI:         http://kafka-ui-itp.{{ .Release.Namespace }}.svc.k8scluster:8080
+{{- end }}
+
+{{- if index .Values "vault-server" "enabled" }}
+4. HashiCorp Vault:
+   Host:             http://vault-itp.{{ .Release.Namespace }}.svc.k8scluster:8200
+   Dev Root Token:   {{ index .Values "vault-server" "vault" "devRootTokenId" }}
+{{- end }}
+
+{{- if .Values.redis.enabled }}
+5. Redis Cache:
+   Host:             itp-redis.{{ .Release.Namespace }}.svc.k8scluster:6379
+{{- end }}
+================================================================================

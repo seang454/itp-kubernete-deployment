@@ -1,0 +1,120 @@
+{{- if .Values.debezium.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.debezium.name }}
+  labels:
+    {{- include "event-driven-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.debezium.name }}
+spec:
+  type: {{ .Values.debezium.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.debezium.service.port }}
+      targetPort: 8083
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ .Values.debezium.name }}
+---
+{{- if .Values.debezium.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: debezium-plugins-itp
+  labels:
+    {{- include "event-driven-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.debezium.name }}
+spec:
+  accessModes: [ {{ .Values.debezium.persistence.accessMode | quote }} ]
+  {{- if .Values.debezium.persistence.storageClassName }}
+  storageClassName: {{ .Values.debezium.persistence.storageClassName | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.debezium.persistence.pluginsSize }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: debezium-data-itp
+  labels:
+    {{- include "event-driven-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.debezium.name }}
+spec:
+  accessModes: [ {{ .Values.debezium.persistence.accessMode | quote }} ]
+  {{- if .Values.debezium.persistence.storageClassName }}
+  storageClassName: {{ .Values.debezium.persistence.storageClassName | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.debezium.persistence.dataSize }}
+---
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.debezium.name }}
+  labels:
+    {{- include "event-driven-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.debezium.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.debezium.name }}
+  template:
+    metadata:
+      labels:
+        {{- include "event-driven-infra.labels" . | nindent 8 }}
+        app.kubernetes.io/name: {{ .Values.debezium.name }}
+    spec:
+      containers:
+        - name: debezium-kafka-connect
+          image: "{{ .Values.debezium.image.repository }}:{{ .Values.debezium.image.tag }}"
+          imagePullPolicy: {{ .Values.debezium.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8083
+              protocol: TCP
+          env:
+            - name: GROUP_ID
+              value: {{ .Values.debezium.groupId | quote }}
+            - name: BOOTSTRAP_SERVERS
+              value: "kafka-1-itp:9090,kafka-2-itp:9090,kafka-3-itp:9090"
+            - name: CONFIG_STORAGE_TOPIC
+              value: {{ .Values.debezium.configStorageTopic | quote }}
+            - name: OFFSET_STORAGE_TOPIC
+              value: {{ .Values.debezium.offsetStorageTopic | quote }}
+            - name: STATUS_STORAGE_TOPIC
+              value: {{ .Values.debezium.statusStorageTopic | quote }}
+            - name: KEY_CONVERTER
+              value: {{ .Values.debezium.keyConverter | quote }}
+            - name: VALUE_CONVERTER
+              value: {{ .Values.debezium.valueConverter | quote }}
+            - name: CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL
+              value: "http://schema-registry-itp:8081"
+            - name: CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL
+              value: "http://schema-registry-itp:8081"
+          volumeMounts:
+            - name: debezium-plugins
+              mountPath: /kafka/connect/plugins
+            - name: debezium-data
+              mountPath: /kafka/data
+          resources:
+            {{- toYaml .Values.debezium.resources | nindent 12 }}
+      volumes:
+        - name: debezium-plugins
+          {{- if .Values.debezium.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: debezium-plugins-itp
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: debezium-data
+          {{- if .Values.debezium.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: debezium-data-itp
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}

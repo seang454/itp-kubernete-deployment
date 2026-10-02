@@ -1,0 +1,13 @@
+ITP PostgreSQL Databases Chart deployed successfully.
+
+1. Microservices Database (pg-itp-micro-db):
+   Host: {{ .Values.microDb.name }}.{{ .Release.Namespace }}.svc.k8scluster
+   Port: {{ .Values.microDb.service.port }}
+   User: {{ .Values.microDb.auth.user }}
+   Databases: db_customer, db_account, db_transaction, db_transfer, db_payment, db_card
+
+2. IAM Database (pg-itp-iam-db):
+   Host: {{ .Values.iamDb.name }}.{{ .Release.Namespace }}.svc.k8scluster
+   Port: {{ .Values.iamDb.service.port }}
+   User: {{ .Values.iamDb.auth.user }}
+   Databases: db_iam, itp_identity_db

@@ -1,0 +1,11 @@
+HashiCorp Vault Server deployed successfully.
+
+1. Access Vault UI and API:
+   Host: {{ include "vault-server.fullname" . }}.{{ .Release.Namespace }}.svc.k8scluster
+   Port: {{ .Values.service.port }}
+   Root Token: {{ .Values.vault.devRootTokenId }}
+
+2. To port-forward to your local machine:
+   kubectl port-forward svc/{{ include "vault-server.fullname" . }} 8200:{{ .Values.service.port }} -n {{ .Release.Namespace }}
+   export VAULT_ADDR="http://127.0.0.1:8200"
+   export VAULT_TOKEN="{{ .Values.vault.devRootTokenId }}"

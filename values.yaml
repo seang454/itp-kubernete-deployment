@@ -1,0 +1,220 @@
+# ==============================================================================
+# ITP Deployment - Main Umbrella Helm Chart
+# Central configuration to control all services:
+# 1. Oracle 19c Enterprise Database
+# 2. ITP PostgreSQL (Microservices DB & IAM DB)
+# 3. Event-Driven Infrastructure (Kafka KRaft cluster, Schema Registry, Debezium, Kafka UI)
+# 4. HashiCorp Vault Server
+# 5. Redis Cache / Datastore
+# ==============================================================================
+
+global: {}
+
+# ------------------------------------------------------------------------------
+# 1. Oracle 19c Database
+# ------------------------------------------------------------------------------
+oracle19c:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: container-registry.oracle.com/database/enterprise
+    tag: "19.3.0.0"
+    pullPolicy: IfNotPresent
+  fullnameOverride: "oracle-itp"
+  service:
+    type: ClusterIP
+    port: 1521
+  oracle:
+    pwd: "Oracle@168"
+    enableArchiveLog: "true"
+  persistence:
+    enabled: true
+    storageClassName: ""
+    size: 20Gi
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+
+# ------------------------------------------------------------------------------
+# 2. PostgreSQL Databases (Microservices & IAM)
+# ------------------------------------------------------------------------------
+itp-postgres:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "17.5-bullseye"
+    pullPolicy: IfNotPresent
+  microDb:
+    enabled: true
+    name: pg-itp-micro-db
+    replicaCount: 1
+    auth:
+      user: itpusr
+      password: "itp@168"
+    service:
+      type: ClusterIP
+      port: 5432
+    persistence:
+      enabled: true
+      storageClassName: ""
+      size: 10Gi
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+  iamDb:
+    enabled: true
+    name: pg-itp-iam-db
+    replicaCount: 1
+    auth:
+      user: itpusr
+      password: "itp@168"
+    service:
+      type: ClusterIP
+      port: 5432
+    persistence:
+      enabled: true
+      storageClassName: ""
+      size: 10Gi
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+# ------------------------------------------------------------------------------
+# 3. Event-Driven Infrastructure (Kafka KRaft, Schema Registry, Debezium, Kafka UI)
+# ------------------------------------------------------------------------------
+event-driven-infra:
+  enabled: true
+  clusterDomain: "k8scluster"
+  clusterId: "4L6g3nShT-eMCtK--X86sw"
+  kafka:
+    image:
+      repository: confluentinc/cp-kafka
+      tag: "7.8.0"
+      pullPolicy: IfNotPresent
+    persistence:
+      enabled: true
+      storageClassName: ""
+      size: 10Gi
+    resources:
+      limits:
+        cpu: 800m
+        memory: 768Mi
+      requests:
+        cpu: 150m
+        memory: 384Mi
+  schemaRegistry:
+    enabled: true
+    name: schema-registry-itp
+    image:
+      repository: confluentinc/cp-schema-registry
+      tag: "7.8.0"
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8081
+    persistence:
+      enabled: true
+      storageClassName: ""
+      size: 5Gi
+  debezium:
+    enabled: true
+    name: debezium-kafka-connect-itp
+    image:
+      repository: debezium-kafka-connect-itp
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8083
+    persistence:
+      enabled: true
+      storageClassName: ""
+      pluginsSize: 5Gi
+      dataSize: 5Gi
+  kafkaUi:
+    enabled: true
+    name: kafka-ui-itp
+    image:
+      repository: provectuslabs/kafka-ui
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8080
+    auth:
+      type: "LOGIN_FORM"
+      username: "admin"
+      password: "qwer"
+    persistence:
+      enabled: true
+      storageClassName: ""
+      size: 2Gi
+
+# ------------------------------------------------------------------------------
+# 4. HashiCorp Vault Server
+# ------------------------------------------------------------------------------
+vault-server:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: hashicorp/vault
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  fullnameOverride: "vault-itp"
+  service:
+    type: ClusterIP
+    port: 8200
+  vault:
+    devRootTokenId: "myroot"
+    devListenAddress: "0.0.0.0:8200"
+  secrets:
+    STRONG_PASSWORD: "Qwer@123"
+    WEAK_PASSWORD: "qwer"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# ------------------------------------------------------------------------------
+# 5. Redis Cache
+# ------------------------------------------------------------------------------
+redis:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: redis
+    tag: "8-alpine"
+    pullPolicy: IfNotPresent
+  fullnameOverride: "itp-redis"
+  service:
+    type: ClusterIP
+    port: 6379
+  auth:
+    enabled: true
+    password: "qwer"
+  persistence:
+    enabled: true
+    storageClassName: ""
+    size: 5Gi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi

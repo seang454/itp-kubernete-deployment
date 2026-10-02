@@ -1,0 +1,53 @@
+# Common Kafka Service for cluster-wide discovery / bootstrap
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  labels:
+    {{- include "event-driven-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/name: kafka
+spec:
+  type: ClusterIP
+  publishNotReadyAddresses: true
+  ports:
+    - name: plaintext
+      port: 9090
+      protocol: TCP
+      targetPort: 9090
+    - name: external
+      port: 9092
+      protocol: TCP
+      targetPort: 9092
+  selector:
+    app.kubernetes.io/part-of: kafka-cluster
+
+---
+# Dedicated Service for each Kafka broker node
+{{- range .Values.kafka.nodes }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}
+  labels:
+    {{- include "event-driven-infra.labels" $ | nindent 4 }}
+    app.kubernetes.io/name: {{ .name }}
+spec:
+  type: ClusterIP
+  publishNotReadyAddresses: true
+  ports:
+    - name: plaintext
+      port: 9090
+      protocol: TCP
+      targetPort: 9090
+    - name: controller
+      port: 9091
+      protocol: TCP
+      targetPort: 9091
+    - name: external
+      port: {{ .externalPort }}
+      protocol: TCP
+      targetPort: {{ .externalPort }}
+  selector:
+    app.kubernetes.io/name: {{ .name }}
+---
+{{- end }}

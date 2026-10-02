@@ -1,0 +1,52 @@
+replicaCount: 1
+
+image:
+  repository: hashicorp/vault
+  tag: "latest"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+nameOverride: ""
+fullnameOverride: "vault-itp"
+
+serviceAccount:
+  create: false
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+
+securityContext:
+  capabilities:
+    add:
+      - IPC_LOCK
+
+service:
+  type: ClusterIP
+  port: 8200
+  nodePort: null
+
+vault:
+  devRootTokenId: "myroot"
+  devListenAddress: "0.0.0.0:8200"
+  command:
+    - vault
+    - server
+    - -dev
+
+# Pre-seeded secrets matching secret.json
+secrets:
+  STRONG_PASSWORD: "Qwer@123"
+  WEAK_PASSWORD: "qwer"
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

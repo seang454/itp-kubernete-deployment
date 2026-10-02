@@ -1,0 +1,89 @@
+{{- if .Values.schemaRegistry.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.schemaRegistry.name }}
+  labels:
+    {{- include "event-driven-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.schemaRegistry.name }}
+spec:
+  type: {{ .Values.schemaRegistry.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.schemaRegistry.service.port }}
+      targetPort: 8081
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ .Values.schemaRegistry.name }}
+---
+{{- if .Values.schemaRegistry.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: schema-registry-itp-data
+  labels:
+    {{- include "event-driven-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.schemaRegistry.name }}
+spec:
+  accessModes: [ {{ .Values.schemaRegistry.persistence.accessMode | quote }} ]
+  {{- if .Values.schemaRegistry.persistence.storageClassName }}
+  storageClassName: {{ .Values.schemaRegistry.persistence.storageClassName | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.schemaRegistry.persistence.size }}
+---
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.schemaRegistry.name }}
+  labels:
+    {{- include "event-driven-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.schemaRegistry.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.schemaRegistry.name }}
+  template:
+    metadata:
+      labels:
+        {{- include "event-driven-infra.labels" . | nindent 8 }}
+        app.kubernetes.io/name: {{ .Values.schemaRegistry.name }}
+    spec:
+      containers:
+        - name: schema-registry
+          image: "{{ .Values.schemaRegistry.image.repository }}:{{ .Values.schemaRegistry.image.tag }}"
+          imagePullPolicy: {{ .Values.schemaRegistry.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8081
+              protocol: TCP
+          env:
+            - name: SCHEMA_REGISTRY_HOST_NAME
+              value: {{ .Values.schemaRegistry.name | quote }}
+            - name: SCHEMA_REGISTRY_LISTENERS
+              value: "http://0.0.0.0:8081"
+            - name: SCHEMA_REGISTRY_DEBUG
+              value: {{ .Values.schemaRegistry.debug | quote }}
+            - name: SCHEMA_REGISTRY_KAFKASTORE_TOPIC
+              value: {{ .Values.schemaRegistry.topic | quote }}
+            - name: SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR
+              value: {{ .Values.schemaRegistry.replicationFactor | quote }}
+            - name: SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS
+              value: "kafka-1-itp:9090,kafka-2-itp:9090,kafka-3-itp:9090"
+          volumeMounts:
+            - name: schema-registry-data
+              mountPath: /etc/schema-registry/data
+          resources:
+            {{- toYaml .Values.schemaRegistry.resources | nindent 12 }}
+      volumes:
+        - name: schema-registry-data
+          {{- if .Values.schemaRegistry.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: schema-registry-itp-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: itp-postgres
+description: Helm chart for ITP PostgreSQL databases (Microservices DB and IAM DB)
+type: application
+version: 0.1.0
+appVersion: "17.5-bullseye"

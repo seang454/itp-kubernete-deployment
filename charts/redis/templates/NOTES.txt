@@ -1,0 +1,9 @@
+Redis cache / datastore deployed successfully.
+
+1. Connect to Redis:
+   Host: {{ include "redis.fullname" . }}.{{ .Release.Namespace }}.svc.k8scluster
+   Port: {{ .Values.service.port }}
+   Password: {{ .Values.auth.password }}
+
+2. Test with redis-cli inside Kubernetes:
+   kubectl exec -it {{ include "redis.fullname" . }}-0 -n {{ .Release.Namespace }} -- redis-cli -a {{ .Values.auth.password }} ping

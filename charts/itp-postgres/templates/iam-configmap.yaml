@@ -1,0 +1,15 @@
+{{- if .Values.iamDb.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.iamDb.name }}-init
+  labels:
+    {{- include "itp-postgres.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.iamDb.name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  01_pg_itp_iam_init.sql: |-
+{{ .Files.Get "init_scripts/pg_itp_iam_init.sql" | indent 4 }}
+  02_postgres_init.sql: |-
+{{ .Files.Get "init_scripts/postgres_init.sql" | indent 4 }}
+{{- end }}

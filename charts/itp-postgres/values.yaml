@@ -1,0 +1,65 @@
+image:
+  repository: postgres
+  tag: "17.5-bullseye"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+# Configuration for Microservices PostgreSQL database (pg-itp-micro-db)
+microDb:
+  enabled: true
+  name: pg-itp-micro-db
+  replicaCount: 1
+  auth:
+    user: itpusr
+    password: "itp@168"
+  service:
+    type: ClusterIP
+    port: 5432
+    nodePort: null
+  persistence:
+    enabled: true
+    storageClassName: ""
+    accessMode: ReadWriteOnce
+    size: 10Gi
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  podSecurityContext:
+    fsGroup: 999
+  securityContext: {}
+
+# Configuration for IAM PostgreSQL database (pg-itp-iam-db)
+iamDb:
+  enabled: true
+  name: pg-itp-iam-db
+  replicaCount: 1
+  auth:
+    user: itpusr
+    password: "itp@168"
+  service:
+    type: ClusterIP
+    port: 5432
+    nodePort: null
+  persistence:
+    enabled: true
+    storageClassName: ""
+    accessMode: ReadWriteOnce
+    size: 10Gi
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  podSecurityContext:
+    fsGroup: 999
+  securityContext: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

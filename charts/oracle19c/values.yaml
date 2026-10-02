@@ -1,0 +1,46 @@
+replicaCount: 1
+
+image:
+  repository: container-registry.oracle.com/database/enterprise
+  tag: "19.3.0.0"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+nameOverride: ""
+fullnameOverride: "oracle-itp"
+
+serviceAccount:
+  create: false
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 1521
+  nodePort: null
+
+oracle:
+  pwd: "Oracle@168"
+  enableArchiveLog: "true"
+
+persistence:
+  enabled: true
+  storageClassName: ""
+  accessMode: ReadWriteOnce
+  size: 20Gi
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+  requests:
+    cpu: 1000m
+    memory: 2Gi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
