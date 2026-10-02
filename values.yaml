@@ -41,8 +41,8 @@ oracle19c:
     enableArchiveLog: "true"
   persistence:
     enabled: true
-    storageClassName: ""
-    size: 20Gi
+    storageClassName: "longhorn"
+    size: 15Gi
   resources:
     limits:
       cpu: 1000m
@@ -72,8 +72,8 @@ itp-postgres:
       port: 5432
     persistence:
       enabled: true
-      storageClassName: ""
-      size: 10Gi
+      storageClassName: "longhorn"
+      size: 2Gi
     resources:
       limits:
         cpu: 250m
@@ -93,8 +93,8 @@ itp-postgres:
       port: 5432
     persistence:
       enabled: true
-      storageClassName: ""
-      size: 10Gi
+      storageClassName: "longhorn"
+      size: 2Gi
     resources:
       limits:
         cpu: 250m
@@ -118,8 +118,8 @@ event-driven-infra:
     jvmOpts: "-Xms128m -Xmx256m"
     persistence:
       enabled: true
-      storageClassName: ""
-      size: 10Gi
+      storageClassName: "longhorn"
+      size: 2Gi
     resources:
       limits:
         cpu: 500m
@@ -140,8 +140,8 @@ event-driven-infra:
     jvmOpts: "-Xms128m -Xmx256m"
     persistence:
       enabled: true
-      storageClassName: ""
-      size: 5Gi
+      storageClassName: "longhorn"
+      size: 1Gi
     resources:
       limits:
         cpu: 250m
@@ -162,9 +162,9 @@ event-driven-infra:
     jvmOpts: "-Xms128m -Xmx384m"
     persistence:
       enabled: true
-      storageClassName: ""
-      pluginsSize: 5Gi
-      dataSize: 5Gi
+      storageClassName: "longhorn"
+      pluginsSize: 2Gi
+      dataSize: 1Gi
     resources:
       limits:
         cpu: 500m
@@ -189,8 +189,8 @@ event-driven-infra:
     jvmOpts: "-Xms64m -Xmx256m"
     persistence:
       enabled: true
-      storageClassName: ""
-      size: 2Gi
+      storageClassName: "longhorn"
+      size: 1Gi
     resources:
       limits:
         cpu: 250m
@@ -246,8 +246,8 @@ redis:
     password: "qwer"
   persistence:
     enabled: true
-    storageClassName: ""
-    size: 5Gi
+    storageClassName: "longhorn"
+    size: 1Gi
   resources:
     limits:
       cpu: 200m

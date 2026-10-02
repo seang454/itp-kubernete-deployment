@@ -37,9 +37,9 @@ oracle:
 
 persistence:
   enabled: true
-  storageClassName: ""
+  storageClassName: "longhorn"
   accessMode: ReadWriteOnce
-  size: 20Gi
+  size: 15Gi
 
 resources:
   limits:

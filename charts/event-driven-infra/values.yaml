@@ -9,9 +9,9 @@ kafka:
     pullPolicy: IfNotPresent
   persistence:
     enabled: true
-    storageClassName: ""
+    storageClassName: "longhorn"
     accessMode: ReadWriteOnce
-    size: 10Gi
+    size: 2Gi
   resources:
     limits:
       cpu: 500m
@@ -55,9 +55,9 @@ schemaRegistry:
   jvmOpts: "-Xms128m -Xmx256m"
   persistence:
     enabled: true
-    storageClassName: ""
+    storageClassName: "longhorn"
     accessMode: ReadWriteOnce
-    size: 5Gi
+    size: 1Gi
   resources:
     limits:
       cpu: 250m
@@ -86,10 +86,10 @@ debezium:
   jvmOpts: "-Xms128m -Xmx384m"
   persistence:
     enabled: true
-    storageClassName: ""
+    storageClassName: "longhorn"
     accessMode: ReadWriteOnce
-    pluginsSize: 5Gi
-    dataSize: 5Gi
+    pluginsSize: 2Gi
+    dataSize: 1Gi
   resources:
     limits:
       cpu: 500m
@@ -118,9 +118,9 @@ kafkaUi:
   jvmOpts: "-Xms64m -Xmx256m"
   persistence:
     enabled: true
-    storageClassName: ""
+    storageClassName: "longhorn"
     accessMode: ReadWriteOnce
-    size: 2Gi
+    size: 1Gi
   resources:
     limits:
       cpu: 250m

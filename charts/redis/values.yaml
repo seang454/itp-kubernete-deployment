@@ -36,9 +36,9 @@ auth:
 
 persistence:
   enabled: true
-  storageClassName: ""
+  storageClassName: "longhorn"
   accessMode: ReadWriteOnce
-  size: 5Gi
+  size: 1Gi
 
 resources:
   limits:
