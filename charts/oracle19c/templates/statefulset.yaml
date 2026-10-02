@@ -19,9 +19,18 @@ spec:
       labels:
         {{- include "oracle19c.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.image.pullSecrets }}
+      {{- $pullSecrets := list }}
+      {{- if and .Values.image.pullSecret.create .Values.image.pullSecret.username }}
+        {{- $pullSecrets = append $pullSecrets (dict "name" (.Values.image.pullSecret.name | default "oracle-registry-secret")) }}
+      {{- end }}
+      {{- range .Values.image.pullSecrets }}
+        {{- if not (has . $pullSecrets) }}
+          {{- $pullSecrets = append $pullSecrets . }}
+        {{- end }}
+      {{- end }}
+      {{- if $pullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml $pullSecrets | nindent 8 }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}

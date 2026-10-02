@@ -6,6 +6,8 @@
 # 3. Event-Driven Infrastructure (Kafka KRaft cluster, Schema Registry, Debezium, Kafka UI)
 # 4. HashiCorp Vault Server
 # 5. Redis Cache / Datastore
+#
+# Resources are minimized and optimized for resource-constrained clusters.
 # ==============================================================================
 
 global: {}
@@ -20,6 +22,16 @@ oracle19c:
     repository: container-registry.oracle.com/database/enterprise
     tag: "19.3.0.0"
     pullPolicy: IfNotPresent
+    pullSecrets:
+      - name: oracle-registry-secret
+    # Set create: true and enter username/password if you want Helm to create the secret automatically
+    pullSecret:
+      create: false
+      name: "oracle-registry-secret"
+      server: "container-registry.oracle.com"
+      username: "pengseangsim210@gmail.com"
+      password: ""
+      email: "pengseangsim210@gmail.com"
   fullnameOverride: "oracle-itp"
   service:
     type: ClusterIP
@@ -33,11 +45,11 @@ oracle19c:
     size: 20Gi
   resources:
     limits:
-      cpu: 2000m
-      memory: 4Gi
-    requests:
       cpu: 1000m
-      memory: 2Gi
+      memory: 2560Mi
+    requests:
+      cpu: 100m
+      memory: 1536Mi
 
 # ------------------------------------------------------------------------------
 # 2. PostgreSQL Databases (Microservices & IAM)
@@ -64,11 +76,11 @@ itp-postgres:
       size: 10Gi
     resources:
       limits:
-        cpu: 1000m
-        memory: 1Gi
+        cpu: 250m
+        memory: 512Mi
       requests:
-        cpu: 100m
-        memory: 256Mi
+        cpu: 25m
+        memory: 128Mi
   iamDb:
     enabled: true
     name: pg-itp-iam-db
@@ -85,11 +97,11 @@ itp-postgres:
       size: 10Gi
     resources:
       limits:
-        cpu: 1000m
-        memory: 1Gi
+        cpu: 250m
+        memory: 512Mi
       requests:
-        cpu: 100m
-        memory: 256Mi
+        cpu: 25m
+        memory: 128Mi
 
 # ------------------------------------------------------------------------------
 # 3. Event-Driven Infrastructure (Kafka KRaft, Schema Registry, Debezium, Kafka UI)
@@ -103,17 +115,18 @@ event-driven-infra:
       repository: confluentinc/cp-kafka
       tag: "7.8.0"
       pullPolicy: IfNotPresent
+    jvmOpts: "-Xms128m -Xmx256m"
     persistence:
       enabled: true
       storageClassName: ""
       size: 10Gi
     resources:
       limits:
-        cpu: 800m
-        memory: 768Mi
+        cpu: 500m
+        memory: 512Mi
       requests:
-        cpu: 150m
-        memory: 384Mi
+        cpu: 50m
+        memory: 256Mi
   schemaRegistry:
     enabled: true
     name: schema-registry-itp
@@ -124,25 +137,41 @@ event-driven-infra:
     service:
       type: ClusterIP
       port: 8081
+    jvmOpts: "-Xms128m -Xmx256m"
     persistence:
       enabled: true
       storageClassName: ""
       size: 5Gi
+    resources:
+      limits:
+        cpu: 250m
+        memory: 384Mi
+      requests:
+        cpu: 25m
+        memory: 192Mi
   debezium:
     enabled: true
     name: debezium-kafka-connect-itp
     image:
-      repository: debezium-kafka-connect-itp
-      tag: "latest"
+      repository: quay.io/debezium/connect
+      tag: "3.4.0.Final"
       pullPolicy: IfNotPresent
     service:
       type: ClusterIP
       port: 8083
+    jvmOpts: "-Xms128m -Xmx384m"
     persistence:
       enabled: true
       storageClassName: ""
       pluginsSize: 5Gi
       dataSize: 5Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 768Mi
+      requests:
+        cpu: 50m
+        memory: 384Mi
   kafkaUi:
     enabled: true
     name: kafka-ui-itp
@@ -157,10 +186,18 @@ event-driven-infra:
       type: "LOGIN_FORM"
       username: "admin"
       password: "qwer"
+    jvmOpts: "-Xms64m -Xmx256m"
     persistence:
       enabled: true
       storageClassName: ""
       size: 2Gi
+    resources:
+      limits:
+        cpu: 250m
+        memory: 384Mi
+      requests:
+        cpu: 25m
+        memory: 128Mi
 
 # ------------------------------------------------------------------------------
 # 4. HashiCorp Vault Server
@@ -184,11 +221,11 @@ vault-server:
     WEAK_PASSWORD: "qwer"
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 200m
+      memory: 256Mi
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 10m
+      memory: 64Mi
 
 # ------------------------------------------------------------------------------
 # 5. Redis Cache
@@ -213,8 +250,8 @@ redis:
     size: 5Gi
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 200m
+      memory: 256Mi
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 10m
+      memory: 64Mi

@@ -14,12 +14,12 @@ kafka:
     size: 10Gi
   resources:
     limits:
-      cpu: 800m
-      memory: 768Mi
+      cpu: 500m
+      memory: 512Mi
     requests:
-      cpu: 150m
-      memory: 384Mi
-  jvmOpts: "-Xms256m -Xmx256m"
+      cpu: 50m
+      memory: 256Mi
+  jvmOpts: "-Xms128m -Xmx256m"
   logDirs: "/var/lib/kafka/data"
   securityContext:
     runAsUser: 1000
@@ -49,9 +49,10 @@ schemaRegistry:
   service:
     type: ClusterIP
     port: 8081
-  debug: "true"
+  debug: "false"
   topic: "_schemas"
   replicationFactor: 3
+  jvmOpts: "-Xms128m -Xmx256m"
   persistence:
     enabled: true
     storageClassName: ""
@@ -59,19 +60,19 @@ schemaRegistry:
     size: 5Gi
   resources:
     limits:
-      cpu: 500m
-      memory: 1Gi
+      cpu: 250m
+      memory: 384Mi
     requests:
-      cpu: 100m
-      memory: 512Mi
+      cpu: 25m
+      memory: 192Mi
 
 # Debezium Kafka Connect
 debezium:
   enabled: true
   name: debezium-kafka-connect-itp
   image:
-    repository: debezium-kafka-connect-itp
-    tag: "latest"
+    repository: quay.io/debezium/connect
+    tag: "3.4.0.Final"
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -82,6 +83,7 @@ debezium:
   statusStorageTopic: "cdc_connect_status"
   keyConverter: "io.confluent.connect.avro.AvroConverter"
   valueConverter: "io.confluent.connect.avro.AvroConverter"
+  jvmOpts: "-Xms128m -Xmx384m"
   persistence:
     enabled: true
     storageClassName: ""
@@ -90,11 +92,11 @@ debezium:
     dataSize: 5Gi
   resources:
     limits:
-      cpu: 1000m
-      memory: 2Gi
+      cpu: 500m
+      memory: 768Mi
     requests:
-      cpu: 250m
-      memory: 1Gi
+      cpu: 50m
+      memory: 384Mi
 
 # Kafka UI
 kafkaUi:
@@ -113,6 +115,7 @@ kafkaUi:
     username: "admin"
     password: "qwer"
   clusterName: "local"
+  jvmOpts: "-Xms64m -Xmx256m"
   persistence:
     enabled: true
     storageClassName: ""
@@ -120,8 +123,8 @@ kafkaUi:
     size: 2Gi
   resources:
     limits:
-      cpu: "1.0"
-      memory: 2G
+      cpu: 250m
+      memory: 384Mi
     requests:
-      cpu: "0.5"
-      memory: 1G
+      cpu: 25m
+      memory: 128Mi

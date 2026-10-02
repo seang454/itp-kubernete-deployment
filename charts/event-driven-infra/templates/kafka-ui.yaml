@@ -80,6 +80,10 @@ spec:
               value: "debezium-kafka-connect-itp"
             - name: KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS
               value: "http://debezium-kafka-connect-itp:8083"
+            {{- if .Values.kafkaUi.jvmOpts }}
+            - name: JAVA_TOOL_OPTIONS
+              value: {{ .Values.kafkaUi.jvmOpts | quote }}
+            {{- end }}
           volumeMounts:
             - name: kafka-ui-data
               mountPath: /data

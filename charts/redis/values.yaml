@@ -42,11 +42,11 @@ persistence:
 
 resources:
   limits:
-    cpu: 500m
-    memory: 512Mi
+    cpu: 200m
+    memory: 256Mi
   requests:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 10m
+    memory: 64Mi
 
 # Custom redis.conf content, defaults to file redis.conf if omitted
 redisConfig: ""

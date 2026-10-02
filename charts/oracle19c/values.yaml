@@ -4,7 +4,15 @@ image:
   repository: container-registry.oracle.com/database/enterprise
   tag: "19.3.0.0"
   pullPolicy: IfNotPresent
-  pullSecrets: []
+  pullSecrets:
+    - name: oracle-registry-secret
+  pullSecret:
+    create: false
+    name: "oracle-registry-secret"
+    server: "container-registry.oracle.com"
+    username: ""
+    password: ""
+    email: ""
 
 nameOverride: ""
 fullnameOverride: "oracle-itp"
@@ -35,11 +43,11 @@ persistence:
 
 resources:
   limits:
-    cpu: 2000m
-    memory: 4Gi
-  requests:
     cpu: 1000m
-    memory: 2Gi
+    memory: 2560Mi
+  requests:
+    cpu: 100m
+    memory: 1536Mi
 
 nodeSelector: {}
 tolerations: []
