@@ -77,6 +77,7 @@ spec:
           volumeMounts:
             - name: kafka-data
               mountPath: {{ $.Values.kafka.logDirs }}
+              subPath: kafka-logs
           resources:
             {{- toYaml $.Values.kafka.resources | nindent 12 }}
       {{- if not $.Values.kafka.persistence.enabled }}

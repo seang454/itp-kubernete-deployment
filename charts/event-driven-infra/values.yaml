@@ -15,11 +15,11 @@ kafka:
   resources:
     limits:
       cpu: 500m
-      memory: 512Mi
+      memory: 1024Mi
     requests:
       cpu: 50m
-      memory: 256Mi
-  jvmOpts: "-Xms128m -Xmx256m"
+      memory: 384Mi
+  jvmOpts: "-Xms192m -Xmx384m"
   logDirs: "/var/lib/kafka/data"
   securityContext:
     runAsUser: 1000
@@ -32,11 +32,11 @@ kafka:
     - id: 2
       name: kafka-2-itp
       externalPort: 9094
-      offsetsTopicReplicationFactor: 1
+      offsetsTopicReplicationFactor: 3
     - id: 3
       name: kafka-3-itp
       externalPort: 9096
-      offsetsTopicReplicationFactor: 1
+      offsetsTopicReplicationFactor: 3
 
 # Schema Registry
 schemaRegistry:
@@ -61,10 +61,10 @@ schemaRegistry:
   resources:
     limits:
       cpu: 250m
-      memory: 384Mi
+      memory: 512Mi
     requests:
       cpu: 25m
-      memory: 192Mi
+      memory: 256Mi
 
 # Debezium Kafka Connect
 debezium:
@@ -95,7 +95,7 @@ debezium:
       cpu: 500m
       memory: 2048Mi
     requests:
-      cpu: 10m
+      cpu: 25m
       memory: 512Mi
 
 # Kafka UI
@@ -124,7 +124,7 @@ kafkaUi:
   resources:
     limits:
       cpu: 250m
-      memory: 384Mi
+      memory: 512Mi
     requests:
       cpu: 25m
-      memory: 128Mi
+      memory: 256Mi

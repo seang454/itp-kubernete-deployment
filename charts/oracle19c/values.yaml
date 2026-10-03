@@ -21,8 +21,8 @@ serviceAccount:
   create: false
   name: ""
 
-podAnnotations: {}
-podSecurityContext: {}
+podSecurityContext:
+  fsGroup: 54321
 
 securityContext: {}
 
@@ -34,6 +34,8 @@ service:
 oracle:
   pwd: "Oracle@168"
   enableArchiveLog: "true"
+  initSgaSize: "1024"
+  initPgaSize: "512"
 
 persistence:
   enabled: true
@@ -44,10 +46,10 @@ persistence:
 resources:
   limits:
     cpu: 1000m
-    memory: 2560Mi
+    memory: 4096Mi
   requests:
     cpu: 100m
-    memory: 1536Mi
+    memory: 2048Mi
 
 nodeSelector: {}
 tolerations: []
